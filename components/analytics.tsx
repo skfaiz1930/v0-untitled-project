@@ -1,23 +1,33 @@
+"use client"
+
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Progress } from "@/components/ui/progress"
-import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-  PieChart,
-  Pie,
-  Cell,
-  Legend,
-} from "recharts"
+import { useState, useEffect } from "react"
+import dynamic from "next/dynamic"
+
+// Dynamically import recharts components with no SSR
+const BarChart = dynamic(() => import("recharts").then((mod) => mod.BarChart), { ssr: false })
+const Bar = dynamic(() => import("recharts").then((mod) => mod.Bar), { ssr: false })
+const XAxis = dynamic(() => import("recharts").then((mod) => mod.XAxis), { ssr: false })
+const YAxis = dynamic(() => import("recharts").then((mod) => mod.YAxis), { ssr: false })
+const CartesianGrid = dynamic(() => import("recharts").then((mod) => mod.CartesianGrid), { ssr: false })
+const Tooltip = dynamic(() => import("recharts").then((mod) => mod.Tooltip), { ssr: false })
+const ResponsiveContainer = dynamic(() => import("recharts").then((mod) => mod.ResponsiveContainer), { ssr: false })
+const PieChart = dynamic(() => import("recharts").then((mod) => mod.PieChart), { ssr: false })
+const Pie = dynamic(() => import("recharts").then((mod) => mod.Pie), { ssr: false })
+const Cell = dynamic(() => import("recharts").then((mod) => mod.Cell), { ssr: false })
+const Legend = dynamic(() => import("recharts").then((mod) => mod.Legend), { ssr: false })
 
 export default function Analytics() {
+  const [isMounted, setIsMounted] = useState(false)
+
+  useEffect(() => {
+    setIsMounted(true)
+  }, [])
+
   const userTypeData = [
     { name: "Senior Executives", value: 156, color: "#8884d8" },
     { name: "Middle Managers", value: 247, color: "#83a6ed" },
@@ -124,18 +134,24 @@ export default function Analytics() {
                 <CardDescription>Delivery, read, and feedback rates by message</CardDescription>
               </CardHeader>
               <CardContent className="h-[300px]">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={engagementData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="name" />
-                    <YAxis />
-                    <Tooltip />
-                    <Legend />
-                    <Bar dataKey="delivered" fill="#8884d8" name="Delivered" />
-                    <Bar dataKey="read" fill="#82ca9d" name="Read" />
-                    <Bar dataKey="feedback" fill="#ffc658" name="Feedback" />
-                  </BarChart>
-                </ResponsiveContainer>
+                {isMounted ? (
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={engagementData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis dataKey="name" />
+                      <YAxis />
+                      <Tooltip />
+                      <Legend />
+                      <Bar dataKey="delivered" fill="#8884d8" name="Delivered" />
+                      <Bar dataKey="read" fill="#82ca9d" name="Read" />
+                      <Bar dataKey="feedback" fill="#ffc658" name="Feedback" />
+                    </BarChart>
+                  </ResponsiveContainer>
+                ) : (
+                  <div className="flex items-center justify-center h-full">
+                    <p className="text-muted-foreground">Loading chart...</p>
+                  </div>
+                )}
               </CardContent>
             </Card>
 
@@ -145,25 +161,31 @@ export default function Analytics() {
                 <CardDescription>Breakdown of delegates by user type</CardDescription>
               </CardHeader>
               <CardContent className="h-[300px]">
-                <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie
-                      data={userTypeData}
-                      cx="50%"
-                      cy="50%"
-                      labelLine={false}
-                      outerRadius={80}
-                      fill="#8884d8"
-                      dataKey="value"
-                      label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
-                    >
-                      {userTypeData.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={entry.color} />
-                      ))}
-                    </Pie>
-                    <Tooltip />
-                  </PieChart>
-                </ResponsiveContainer>
+                {isMounted ? (
+                  <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
+                      <Pie
+                        data={userTypeData}
+                        cx="50%"
+                        cy="50%"
+                        labelLine={false}
+                        outerRadius={80}
+                        fill="#8884d8"
+                        dataKey="value"
+                        label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                      >
+                        {userTypeData.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={entry.color} />
+                        ))}
+                      </Pie>
+                      <Tooltip />
+                    </PieChart>
+                  </ResponsiveContainer>
+                ) : (
+                  <div className="flex items-center justify-center h-full">
+                    <p className="text-muted-foreground">Loading chart...</p>
+                  </div>
+                )}
               </CardContent>
             </Card>
           </div>
@@ -174,17 +196,23 @@ export default function Analytics() {
               <CardDescription>Read and feedback rates across different user types</CardDescription>
             </CardHeader>
             <CardContent className="h-[300px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={userTypeEngagementData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="name" />
-                  <YAxis />
-                  <Tooltip />
-                  <Legend />
-                  <Bar dataKey="readRate" fill="#82ca9d" name="Read Rate (%)" />
-                  <Bar dataKey="feedbackRate" fill="#ffc658" name="Feedback Rate (%)" />
-                </BarChart>
-              </ResponsiveContainer>
+              {isMounted ? (
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={userTypeEngagementData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="name" />
+                    <YAxis />
+                    <Tooltip />
+                    <Legend />
+                    <Bar dataKey="readRate" fill="#82ca9d" name="Read Rate (%)" />
+                    <Bar dataKey="feedbackRate" fill="#ffc658" name="Feedback Rate (%)" />
+                  </BarChart>
+                </ResponsiveContainer>
+              ) : (
+                <div className="flex items-center justify-center h-full">
+                  <p className="text-muted-foreground">Loading chart...</p>
+                </div>
+              )}
             </CardContent>
           </Card>
         </TabsContent>
@@ -285,13 +313,13 @@ export default function Analytics() {
                   <div className="space-y-2">
                     <h4 className="font-medium">Positive Feedback</h4>
                     <div className="text-2xl font-bold text-green-500">78%</div>
-                    <Progress value={78} className="h-2 bg-gray-200" indicatorClassName="bg-green-500" />
+                    <Progress value={78} className="h-2 bg-gray-200" />
                   </div>
 
                   <div className="space-y-2">
                     <h4 className="font-medium">Negative Feedback</h4>
                     <div className="text-2xl font-bold text-red-500">22%</div>
-                    <Progress value={22} className="h-2 bg-gray-200" indicatorClassName="bg-red-500" />
+                    <Progress value={22} className="h-2 bg-gray-200" />
                   </div>
                 </div>
 
@@ -304,11 +332,7 @@ export default function Analytics() {
                           <span>{session.name}</span>
                           <span>{Math.floor(Math.random() * 30) + 70}% positive</span>
                         </div>
-                        <Progress
-                          value={Math.floor(Math.random() * 30) + 70}
-                          className="h-2 bg-gray-200"
-                          indicatorClassName="bg-green-500"
-                        />
+                        <Progress value={Math.floor(Math.random() * 30) + 70} className="h-2 bg-gray-200" />
                       </div>
                     ))}
                   </div>
