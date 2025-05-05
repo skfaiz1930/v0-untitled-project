@@ -21,6 +21,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Input } from "@/components/ui/input"
 import { mockNudges, mockTeamMembers } from "@/lib/mock-data"
 import NudgeConfetti from "@/components/nudges/nudge-confetti"
+import ImplementationSteps from "@/components/nudges/implementation-steps"
 
 export default function NudgesPage() {
   const [activeTab, setActiveTab] = useState("today")
@@ -280,6 +281,12 @@ export default function NudgesPage() {
                         </div>
                       </div>
                     )}
+
+                    <ImplementationSteps
+                      nudgeId={nudge.id}
+                      nudgeTitle={nudge.title}
+                      nudgeDescription={nudge.description}
+                    />
                   </CardContent>
                   <CardFooter className="flex justify-between pt-0">
                     <Dialog>

@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { Home, Award, MessageSquare, Users, Settings, LogOut, X } from "lucide-react"
+import { Home, Bell, Trophy, MessageSquare, Users, BarChart3, LogOut, Lightbulb, X, Sparkles } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -13,6 +13,44 @@ interface SidebarProps {
   isOpen: boolean
   isMobile: boolean
 }
+
+const sidebarLinks = [
+  {
+    name: "Dashboard",
+    href: "/dashboard",
+    icon: Home,
+  },
+  {
+    name: "Nudges",
+    href: "/nudges",
+    icon: Bell,
+  },
+  {
+    name: "Leaderboard",
+    href: "/leaderboard",
+    icon: Trophy,
+  },
+  {
+    name: "Chat",
+    href: "/chat",
+    icon: MessageSquare,
+  },
+  {
+    name: "Team",
+    href: "/team",
+    icon: Users,
+  },
+  {
+    name: "AI Personalization",
+    href: "/ai-personalization",
+    icon: Lightbulb,
+  },
+  {
+    name: "AI Insights",
+    href: "/ai-insights",
+    icon: Sparkles,
+  },
+]
 
 export default function Sidebar({ isOpen, isMobile }: SidebarProps) {
   const pathname = usePathname()
@@ -37,19 +75,9 @@ export default function Sidebar({ isOpen, isMobile }: SidebarProps) {
 
   if (!mounted) return null
 
-  // Define sidebar links
-  const links = [
-    { href: "/dashboard", label: "Dashboard", icon: <Home className="h-5 w-5" /> },
-    { href: "/nudges", label: "Nudges", icon: <Award className="h-5 w-5" /> },
-    { href: "/leaderboard", label: "Leaderboard", icon: <Award className="h-5 w-5" /> },
-    { href: "/chat", label: "Chat", icon: <MessageSquare className="h-5 w-5" /> },
-    { href: "/team", label: "Team", icon: <Users className="h-5 w-5" /> },
-    { href: "/settings", label: "Settings", icon: <Settings className="h-5 w-5" /> },
-  ]
-
   const sidebarClasses = cn(
-    "fixed top-0 left-0 z-40 h-screen bg-white dark:bg-gray-800 shadow-soft transition-all duration-300",
-    "flex flex-col border-r border-gray-200 dark:border-gray-700",
+    "fixed top-0 left-0 z-40 h-screen bg-white dark:bg-gray-900 shadow-soft transition-all duration-300",
+    "flex flex-col border-r border-gray-200 dark:border-gray-800",
     {
       "w-64": isOpen,
       "w-0 -translate-x-full": !isOpen && isMobile,
@@ -70,7 +98,7 @@ export default function Sidebar({ isOpen, isMobile }: SidebarProps) {
         </Button>
       )}
 
-      <div className="flex items-center justify-center h-16 border-b border-gray-200 dark:border-gray-700">
+      <div className="flex items-center justify-center h-16 border-b border-gray-200 dark:border-gray-800">
         {isOpen ? (
           <h1 className="text-xl font-bold text-primary">NudgeManager</h1>
         ) : (
@@ -80,29 +108,41 @@ export default function Sidebar({ isOpen, isMobile }: SidebarProps) {
 
       <div className="flex flex-col justify-between flex-1 overflow-y-auto">
         <nav className="px-3 py-4">
-          <ul className="space-y-2">
-            {links.map((link) => (
-              <li key={link.href}>
-                <Link href={link.href}>
-                  <div
-                    className={cn(
-                      "flex items-center px-3 py-2 rounded-md transition-colors",
-                      "hover:bg-gray-100 dark:hover:bg-gray-700",
-                      pathname === link.href
-                        ? "bg-primary/10 text-primary dark:bg-primary/20"
-                        : "text-gray-700 dark:text-gray-300",
-                    )}
-                  >
-                    {link.icon}
-                    {isOpen && <span className="ml-3">{link.label}</span>}
-                  </div>
+          <ul className="space-y-1">
+            {sidebarLinks.map((link) => (
+              <li key={link.name}>
+                <Link
+                  href={link.href}
+                  className={cn(
+                    "flex items-center gap-3 rounded-lg px-3 py-2 text-gray-500 transition-all hover:text-gray-900 dark:text-gray-400 dark:hover:text-white",
+                    pathname === link.href ? "bg-blue-50 text-blue-600 dark:bg-gray-800 dark:text-blue-400" : "",
+                  )}
+                >
+                  <link.icon className="h-5 w-5" />
+                  {isOpen && <span>{link.name}</span>}
                 </Link>
               </li>
             ))}
+
+            {/* Add Pulse Survey link */}
+            <li>
+              <Link
+                href="/pulse-survey"
+                className={cn(
+                  "flex items-center gap-3 rounded-lg px-3 py-2 text-gray-500 transition-all hover:text-gray-900 dark:text-gray-400 dark:hover:text-white",
+                  pathname.startsWith("/pulse-survey")
+                    ? "bg-blue-50 text-blue-600 dark:bg-gray-800 dark:text-blue-400"
+                    : "",
+                )}
+              >
+                <BarChart3 className="h-5 w-5" />
+                {isOpen && <span>Pulse Survey</span>}
+              </Link>
+            </li>
           </ul>
         </nav>
 
-        <div className="p-3 border-t border-gray-200 dark:border-gray-700">
+        <div className="p-3 border-t border-gray-200 dark:border-gray-800">
           {isOpen ? (
             <div className="flex items-center space-x-3">
               <Avatar>
@@ -128,8 +168,7 @@ export default function Sidebar({ isOpen, isMobile }: SidebarProps) {
           <Button
             variant="ghost"
             className={cn(
-              "w-full mt-3 text-gray-700 dark:text-gray-300",
-              "hover:bg-gray-100 dark:hover:bg-gray-700",
+              "w-full mt-3 text-gray-500 transition-all hover:text-gray-900 dark:text-gray-400 dark:hover:text-white",
               !isOpen && "p-2 justify-center",
             )}
           >

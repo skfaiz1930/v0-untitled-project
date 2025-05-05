@@ -43,7 +43,7 @@ export default function Header({ isSidebarOpen, toggleSidebar }: HeaderProps) {
   }
 
   return (
-    <header className="fixed top-0 right-0 left-0 z-30 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 shadow-sm">
+    <header className="fixed top-0 right-0 left-0 z-50 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 shadow-sm">
       <div className="flex items-center justify-between h-16 px-4">
         <div className="flex items-center">
           <Button variant="ghost" size="icon" onClick={toggleSidebar} className="mr-2">
