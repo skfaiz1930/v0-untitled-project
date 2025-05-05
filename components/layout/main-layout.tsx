@@ -52,7 +52,7 @@ export default function MainLayout({
       <Sidebar isOpen={isSidebarOpen} isMobile={isMobile} />
       <div className="flex flex-col flex-1">
         <Header isSidebarOpen={isSidebarOpen} toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
-        <main className="flex-1 p-4 md:p-6 pt-20 md:ml-[var(--sidebar-width)]">{children}</main>
+        <main className="flex-1 p-6 pt-20 md:ml-[var(--sidebar-width)]">{children}</main>
       </div>
     </div>
   )
