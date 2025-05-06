@@ -33,11 +33,6 @@ const navigationItems = [
     icon: Bell,
   },
   {
-    title: "Pulse Survey",
-    href: "/pulse-survey",
-    icon: LineChart,
-  },
-  {
     title: "AI Insights",
     href: "/ai-insights",
     icon: Sparkles,
