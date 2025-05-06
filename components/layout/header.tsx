@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect } from "react"
+import { useEffect, useState } from "react"
 import { usePathname } from "next/navigation"
 import { Menu, Bell, Search } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -14,6 +14,10 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Badge } from "@/components/ui/badge"
+import { useGamification } from "@/contexts/gamification-context"
+import { CoinDisplay } from "@/components/gamification/coin-display"
+import { BadgeDisplay } from "@/components/gamification/coin-display"
+import { BadgesCollection } from "@/components/gamification/badges-collection"
 
 interface HeaderProps {
   isSidebarOpen: boolean
@@ -22,6 +26,8 @@ interface HeaderProps {
 
 export default function Header({ isSidebarOpen, toggleSidebar }: HeaderProps) {
   const pathname = usePathname()
+  const { coins, badges, recentBadge, clearRecentBadge } = useGamification()
+  const [showBadgesCollection, setShowBadgesCollection] = useState(false)
 
   // Listen for toggle sidebar event (from mobile sidebar)
   useEffect(() => {
@@ -42,6 +48,8 @@ export default function Header({ isSidebarOpen, toggleSidebar }: HeaderProps) {
     return path.charAt(0).toUpperCase() + path.slice(1)
   }
 
+  const earnedBadges = badges.filter((badge) => badge.earned)
+
   return (
     <header className="fixed top-0 right-0 left-0 z-50 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 shadow-sm">
       <div className="flex items-center justify-between h-16 px-4">
@@ -59,6 +67,19 @@ export default function Header({ isSidebarOpen, toggleSidebar }: HeaderProps) {
               type="search"
               placeholder="Search..."
               className="w-64 pl-8 rounded-full bg-gray-100 dark:bg-gray-700 border-none"
+            />
+          </div>
+
+          <div className="flex items-center gap-3">
+            <CoinDisplay coins={coins} />
+
+            <BadgeDisplay
+              count={earnedBadges.length}
+              recentBadge={recentBadge}
+              onClick={() => {
+                setShowBadgesCollection(true)
+                clearRecentBadge()
+              }}
             />
           </div>
 
@@ -101,6 +122,8 @@ export default function Header({ isSidebarOpen, toggleSidebar }: HeaderProps) {
           </DropdownMenu>
         </div>
       </div>
+
+      <BadgesCollection badges={badges} open={showBadgesCollection} onOpenChange={setShowBadgesCollection} />
     </header>
   )
 }
