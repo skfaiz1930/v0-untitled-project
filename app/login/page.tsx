@@ -5,19 +5,23 @@ import type React from "react"
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { motion } from "framer-motion"
-import { Sparkles, Trophy, Star, ArrowRight } from "lucide-react"
+import { Sparkles, Trophy, Star, ArrowRight, Shield } from "lucide-react"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { useToast } from "@/hooks/use-toast"
 
 export default function LoginPage() {
   const router = useRouter()
+  const { toast } = useToast()
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [name, setName] = useState("")
+  const [role, setRole] = useState("")
   const [loading, setLoading] = useState(false)
   const [activeTab, setActiveTab] = useState("login")
 
@@ -25,10 +29,37 @@ export default function LoginPage() {
     e.preventDefault()
     setLoading(true)
 
-    // Simulate login
+    // Simulate login with role-based redirection
     setTimeout(() => {
       setLoading(false)
-      router.push("/assessment")
+
+      // Log the login attempt in audit logs
+      const loginData = {
+        email,
+        timestamp: new Date().toISOString(),
+        action: "login",
+        ip: "192.168.1.1", // In a real app, this would be the actual IP
+        device: navigator.userAgent,
+        success: true,
+      }
+
+      console.log("Login audit:", loginData)
+
+      // Store user role in localStorage (in a real app, this would be in a secure HTTP-only cookie)
+      localStorage.setItem("userRole", role || "user")
+      localStorage.setItem("userEmail", email)
+
+      toast({
+        title: "Login successful",
+        description: `Welcome back${role ? ` as ${role}` : ""}!`,
+      })
+
+      // Redirect based on role
+      if (role === "super_admin" || role === "hr_admin" || role === "department_admin") {
+        router.push("/admin/dashboard")
+      } else {
+        router.push("/assessment")
+      }
     }, 1500)
   }
 
@@ -39,6 +70,29 @@ export default function LoginPage() {
     // Simulate registration
     setTimeout(() => {
       setLoading(false)
+
+      // Log the registration in audit logs
+      const registrationData = {
+        email,
+        name,
+        role: role || "user",
+        timestamp: new Date().toISOString(),
+        action: "register",
+        ip: "192.168.1.1", // In a real app, this would be the actual IP
+        device: navigator.userAgent,
+      }
+
+      console.log("Registration audit:", registrationData)
+
+      // Store user role in localStorage (in a real app, this would be in a secure HTTP-only cookie)
+      localStorage.setItem("userRole", role || "user")
+      localStorage.setItem("userEmail", email)
+
+      toast({
+        title: "Registration successful",
+        description: "Your account has been created.",
+      })
+
       router.push("/assessment")
     }, 1500)
   }
@@ -104,6 +158,23 @@ export default function LoginPage() {
                           onChange={(e) => setPassword(e.target.value)}
                           required
                         />
+                      </div>
+                      <div className="grid gap-2">
+                        <Label htmlFor="role">Role (For Demo)</Label>
+                        <Select value={role} onValueChange={setRole}>
+                          <SelectTrigger id="role">
+                            <SelectValue placeholder="Select role" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="user">Regular User</SelectItem>
+                            <SelectItem value="department_admin">Department Admin</SelectItem>
+                            <SelectItem value="hr_admin">HR Admin</SelectItem>
+                            <SelectItem value="super_admin">Super Admin</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <p className="text-xs text-muted-foreground">
+                          For demo purposes only. Select a role to see different permission levels.
+                        </p>
                       </div>
                       <Button type="submit" disabled={loading}>
                         {loading ? (
@@ -171,6 +242,23 @@ export default function LoginPage() {
                           required
                         />
                       </div>
+                      <div className="grid gap-2">
+                        <Label htmlFor="register-role">Role (For Demo)</Label>
+                        <Select value={role} onValueChange={setRole}>
+                          <SelectTrigger id="register-role">
+                            <SelectValue placeholder="Select role" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="user">Regular User</SelectItem>
+                            <SelectItem value="department_admin">Department Admin</SelectItem>
+                            <SelectItem value="hr_admin">HR Admin</SelectItem>
+                            <SelectItem value="super_admin">Super Admin</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <p className="text-xs text-muted-foreground">
+                          For demo purposes only. Select a role to see different permission levels.
+                        </p>
+                      </div>
                       <Button type="submit" disabled={loading}>
                         {loading ? (
                           <div className="flex items-center">
@@ -202,7 +290,7 @@ export default function LoginPage() {
           initial={{ y: 20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ duration: 0.5, delay: 0.3 }}
-          className="mt-8 flex justify-center gap-4"
+          className="mt-8 flex justify-center gap-4 flex-wrap"
         >
           <Badge variant="outline" className="flex items-center gap-1 py-1.5">
             <Trophy className="h-3.5 w-3.5 text-amber-500" />
@@ -215,6 +303,10 @@ export default function LoginPage() {
           <Badge variant="outline" className="flex items-center gap-1 py-1.5">
             <Sparkles className="h-3.5 w-3.5 text-blue-500" />
             <span>Level Up</span>
+          </Badge>
+          <Badge variant="outline" className="flex items-center gap-1 py-1.5">
+            <Shield className="h-3.5 w-3.5 text-green-500" />
+            <span>Admin Controls</span>
           </Badge>
         </motion.div>
       </div>

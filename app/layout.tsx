@@ -1,15 +1,19 @@
 import type React from "react"
-import "@/app/globals.css"
+import type { Metadata } from "next"
 import { Inter } from "next/font/google"
+import "./globals.css"
 import { ThemeProvider } from "@/components/theme-provider"
-import { Toaster } from "@/components/ui/toaster"
 import { GamificationProvider } from "@/contexts/gamification-context"
+import { CommunityProvider } from "@/contexts/community-context"
+import { AuthProvider } from "@/contexts/auth-context"
+import { SharingPrompt } from "@/components/community/sharing-prompt"
+import { Toaster } from "@/components/ui/toaster"
 
 const inter = Inter({ subsets: ["latin"] })
 
-export const metadata = {
-  title: "Manager Nudge App",
-  description: "AI-powered leadership development app",
+export const metadata: Metadata = {
+  title: "NudgeManager - Leadership Development Platform",
+  description: "Develop your leadership skills with personalized nudges and feedback",
     generator: 'v0.dev'
 }
 
@@ -18,10 +22,15 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en" suppressHydrationWarning>
       <body className={inter.className}>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-          <GamificationProvider>
-            {children}
-            <Toaster />
-          </GamificationProvider>
+          <AuthProvider>
+            <GamificationProvider>
+              <CommunityProvider>
+                {children}
+                <SharingPrompt />
+                <Toaster />
+              </CommunityProvider>
+            </GamificationProvider>
+          </AuthProvider>
         </ThemeProvider>
       </body>
     </html>

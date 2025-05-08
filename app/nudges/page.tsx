@@ -20,6 +20,7 @@ import {
   Coins,
   Flame,
   AlertTriangle,
+  Share2,
 } from "lucide-react"
 import {
   Dialog,
@@ -40,6 +41,7 @@ import CoinAnimation from "@/components/gamification/coin-animation"
 import { PremiumNudges } from "@/components/gamification/premium-nudges"
 import { StreakRevival } from "@/components/gamification/streak-revival"
 import { ExpiredNudgeRevival } from "@/components/nudges/expired-nudge-revival"
+import { useCommunity } from "@/contexts/community-context"
 
 // Add expired nudges to the mock data
 const mockExpiredNudges = [
@@ -74,6 +76,7 @@ export default function NudgesPage() {
   const [showStreakRevival, setShowStreakRevival] = useState(false)
   const [showExpiredNudgeRevival, setShowExpiredNudgeRevival] = useState(false)
   const [selectedExpiredNudge, setSelectedExpiredNudge] = useState<any>(null)
+  const { createPost } = useCommunity() // Move hook to the top level
 
   const {
     coins,
@@ -87,6 +90,7 @@ export default function NudgesPage() {
     setShowCoinAnimation,
     animationAmount,
     earnBadge,
+    completedNudge,
   } = useGamification()
 
   // Check if streak needs revival
@@ -172,7 +176,7 @@ export default function NudgesPage() {
     )
 
     // Show confetti animation when completing a nudge
-    if (!wasCompleted) {
+    if (!wasCompleted && nudge) {
       setShowConfetti(true)
       setTimeout(() => setShowConfetti(false), 3000)
 
@@ -189,7 +193,22 @@ export default function NudgesPage() {
       } else if (completedCount === 10) {
         earnBadge("badge-3") // 10 Nudges Completed badge
       }
+
+      // Trigger sharing prompt
+      completedNudge(nudge.title)
     }
+  }
+
+  const handleShareNudge = (nudgeId: string) => {
+    const nudge = nudges.find((n) => n.id === nudgeId)
+    if (!nudge) return
+
+    // Use the community context to create a post
+    createPost({
+      type: "nudges",
+      content: `I found this nudge really valuable: "${nudge.title}" - ${nudge.description}`,
+      tags: ["leadership", "nudge", ...nudge.categories.map((c) => c.toLowerCase().replace(/\s+/g, ""))],
+    })
   }
 
   const handleTagTeamMember = (nudgeId: string, memberId: string) => {
@@ -380,7 +399,7 @@ export default function NudgesPage() {
           <TabsContent value="expired">
             {expiredNudges.length === 0 ? (
               <Card>
-                <CardContent className="flex flex-col items-center justify-center py-10">
+                <CardContent className="flex flex-col items-centerr justify-center py-10">
                   <div className="rounded-full bg-primary/10 p-3 mb-4">
                     <Clock className="h-6 w-6 text-primary" />
                   </div>
@@ -573,63 +592,70 @@ export default function NudgesPage() {
                     )}
                   </CardContent>
                   <CardFooter className="flex justify-between pt-0">
-                    <Dialog>
-                      <DialogTrigger asChild>
-                        <Button variant="outline" size="sm">
-                          <TagIcon className="h-4 w-4 mr-2" />
-                          Tag Team Member
-                        </Button>
-                      </DialogTrigger>
-                      <DialogContent>
-                        <DialogHeader>
-                          <DialogTitle>Tag Team Members</DialogTitle>
-                          <DialogDescription>Select team members to associate with this nudge.</DialogDescription>
-                        </DialogHeader>
-                        <div className="grid gap-4 py-4">
-                          <div className="space-y-2">
-                            {teamMembers.map((member) => (
-                              <div
-                                key={member.id}
-                                className={`flex items-center justify-between p-2 rounded-md cursor-pointer ${
-                                  selectedTeamMembers.includes(member.id) ? "bg-primary/10" : "hover:bg-secondary"
-                                }`}
-                                onClick={() => handleTagTeamMember(nudge.id, member.id)}
-                              >
-                                <div className="flex items-center">
-                                  <Avatar className="h-8 w-8 mr-2">
-                                    <AvatarImage src={`/placeholder.svg?height=32&width=32`} />
-                                    <AvatarFallback>{member.name.charAt(0)}</AvatarFallback>
-                                  </Avatar>
-                                  <div>
-                                    <p className="text-sm font-medium">{member.name}</p>
-                                    <p className="text-xs text-muted-foreground">{member.role}</p>
+                    <div className="flex gap-2">
+                      <Dialog>
+                        <DialogTrigger asChild>
+                          <Button variant="outline" size="sm">
+                            <TagIcon className="h-4 w-4 mr-2" />
+                            Tag Team Member
+                          </Button>
+                        </DialogTrigger>
+                        <DialogContent>
+                          <DialogHeader>
+                            <DialogTitle>Tag Team Members</DialogTitle>
+                            <DialogDescription>Select team members to associate with this nudge.</DialogDescription>
+                          </DialogHeader>
+                          <div className="grid gap-4 py-4">
+                            <div className="space-y-2">
+                              {teamMembers.map((member) => (
+                                <div
+                                  key={member.id}
+                                  className={`flex items-center justify-between p-2 rounded-md cursor-pointer ${
+                                    selectedTeamMembers.includes(member.id) ? "bg-primary/10" : "hover:bg-secondary"
+                                  }`}
+                                  onClick={() => handleTagTeamMember(nudge.id, member.id)}
+                                >
+                                  <div className="flex items-center">
+                                    <Avatar className="h-8 w-8 mr-2">
+                                      <AvatarImage src={`/placeholder.svg?height=32&width=32`} />
+                                      <AvatarFallback>{member.name.charAt(0)}</AvatarFallback>
+                                    </Avatar>
+                                    <div>
+                                      <p className="text-sm font-medium">{member.name}</p>
+                                      <p className="text-xs text-muted-foreground">{member.role}</p>
+                                    </div>
+                                  </div>
+                                  <div
+                                    className={`h-5 w-5 rounded-full border ${
+                                      selectedTeamMembers.includes(member.id)
+                                        ? "bg-primary border-primary"
+                                        : "border-gray-300 dark:border-gray-600"
+                                    }`}
+                                  >
+                                    {selectedTeamMembers.includes(member.id) && (
+                                      <CheckCircle className="h-5 w-5 text-white" />
+                                    )}
                                   </div>
                                 </div>
-                                <div
-                                  className={`h-5 w-5 rounded-full border ${
-                                    selectedTeamMembers.includes(member.id)
-                                      ? "bg-primary border-primary"
-                                      : "border-gray-300 dark:border-gray-600"
-                                  }`}
-                                >
-                                  {selectedTeamMembers.includes(member.id) && (
-                                    <CheckCircle className="h-5 w-5 text-white" />
-                                  )}
-                                </div>
-                              </div>
-                            ))}
+                              ))}
+                            </div>
                           </div>
-                        </div>
-                        <DialogFooter>
-                          <Button
-                            onClick={() => confirmTagTeamMembers(nudge.id)}
-                            disabled={selectedTeamMembers.length === 0}
-                          >
-                            Confirm
-                          </Button>
-                        </DialogFooter>
-                      </DialogContent>
-                    </Dialog>
+                          <DialogFooter>
+                            <Button
+                              onClick={() => confirmTagTeamMembers(nudge.id)}
+                              disabled={selectedTeamMembers.length === 0}
+                            >
+                              Confirm
+                            </Button>
+                          </DialogFooter>
+                        </DialogContent>
+                      </Dialog>
+
+                      <Button variant="outline" size="sm" onClick={() => handleShareNudge(nudge.id)}>
+                        <Share2 className="h-4 w-4 mr-2" />
+                        Share
+                      </Button>
+                    </div>
                     <Button
                       variant={nudge.completed ? "outline" : "default"}
                       onClick={() => handleCompleteNudge(nudge.id)}

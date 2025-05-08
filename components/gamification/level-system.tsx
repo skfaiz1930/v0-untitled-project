@@ -137,7 +137,7 @@ const levelData: LevelInfo[] = [
 
 export function LevelSystem() {
   const { addCoins, earnBadge } = useGamification()
-  const [currentXp, setCurrentXp] = useState(490)
+  const [currentXp, setCurrentXp] = useState(320)
   const [currentLevel, setCurrentLevel] = useState(0)
   const [nextLevel, setNextLevel] = useState<LevelInfo | null>(null)
   const [showLevelUp, setShowLevelUp] = useState(false)

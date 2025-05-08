@@ -3,12 +3,25 @@
 import { useState, useEffect, useCallback } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { Bell, Trophy, MessageSquare, Users, LogOut, X, Sparkles } from "lucide-react"
-import { Target, LinkIcon, LayoutDashboard, LineChart, Settings } from "lucide-react" // Updated imports
+import { Bell, Trophy, MessageSquare, Users, LogOut, X, Sparkles, Gift } from "lucide-react"
+import {
+  Target,
+  LinkIcon,
+  LayoutDashboard,
+  LineChart,
+  Settings,
+  Zap,
+  Share2,
+  ShieldCheck,
+  Shield,
+  FileText,
+  Clock,
+} from "lucide-react" // Updated imports
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { ModeToggle } from "@/components/mode-toggle"
+import { useAuth } from "@/contexts/auth-context"
 
 interface SidebarProps {
   isOpen: boolean
@@ -16,7 +29,7 @@ interface SidebarProps {
 }
 
 // Update the navigation items array to include the new features
-const navigationItems = [
+const navigation = [
   {
     title: "Dashboard",
     href: "/dashboard",
@@ -31,6 +44,26 @@ const navigationItems = [
     title: "Nudges",
     href: "/nudges",
     icon: Bell,
+  },
+  {
+    title: "Community",
+    href: "/community",
+    icon: Share2,
+  },
+  {
+    title: "Engagement",
+    href: "/engagement",
+    icon: Gift,
+  },
+  {
+    title: "Features",
+    href: "/features",
+    icon: Zap,
+  },
+  {
+    title: "Pulse Survey",
+    href: "/pulse-survey",
+    icon: LineChart,
   },
   {
     title: "AI Insights",
@@ -62,11 +95,77 @@ const navigationItems = [
     href: "/ai-personalization",
     icon: Settings,
   },
+  {
+    title: "Admin Dashboard",
+    href: "/admin/dashboard",
+    icon: ShieldCheck,
+  },
+  {
+    title: "Admin",
+    items: [
+      {
+        title: "Dashboard",
+        href: "/admin/dashboard",
+        icon: <LayoutDashboard className="h-4 w-4" />,
+        adminOnly: true,
+      },
+      {
+        title: "Audit Logs",
+        href: "/admin/audit-logs",
+        icon: <FileText className="h-4 w-4" />,
+        adminOnly: true,
+        permission: "view_audit_logs",
+      },
+      {
+        title: "Access History",
+        href: "/admin/access-history",
+        icon: <Clock className="h-4 w-4" />,
+        adminOnly: true,
+        permission: "view_access_history",
+      },
+      {
+        title: "Permissions",
+        href: "/admin/permissions",
+        icon: <Shield className="h-4 w-4" />,
+        adminOnly: true,
+        permission: "manage_permissions",
+      },
+    ],
+  },
 ]
 
-export default function Sidebar({ isOpen, isMobile }: SidebarProps) {
+export function Sidebar({ isOpen, isMobile }: SidebarProps) {
   const pathname = usePathname()
   const [mounted, setMounted] = useState(false)
+  const { isAdmin, hasPermission } = useAuth()
+
+  // Filter navigation items based on permissions
+  const filteredNavigation = navigation
+    .filter((group) => {
+      if (Array.isArray(group.items)) {
+        const hasVisibleItems = group.items.some((item) => {
+          if (item.adminOnly && !isAdmin()) return false
+          if (item.permission && !hasPermission(item.permission)) return false
+          return true
+        })
+
+        return hasVisibleItems
+      }
+      return true
+    })
+    .map((group) => {
+      if (Array.isArray(group.items)) {
+        return {
+          ...group,
+          items: group.items.filter((item) => {
+            if (item.adminOnly && !isAdmin()) return false
+            if (item.permission && !hasPermission(item.permission)) return false
+            return true
+          }),
+        }
+      }
+      return group
+    })
 
   useEffect(() => {
     setMounted(true)
@@ -121,20 +220,44 @@ export default function Sidebar({ isOpen, isMobile }: SidebarProps) {
       <div className="flex flex-col justify-between flex-1 overflow-y-auto">
         <nav className="px-3 py-4">
           <ul className="space-y-1">
-            {navigationItems.map((link) => (
-              <li key={link.title}>
-                <Link
-                  href={link.href}
-                  className={cn(
-                    "flex items-center gap-3 rounded-lg px-3 py-2 text-gray-500 transition-all hover:text-gray-900 dark:text-gray-400 dark:hover:text-white",
-                    pathname === link.href ? "bg-blue-50 text-blue-600 dark:bg-gray-800 dark:text-blue-400" : "",
-                  )}
-                >
-                  <link.icon className="h-5 w-5" />
-                  {isOpen && <span>{link.title}</span>}
-                </Link>
-              </li>
-            ))}
+            {filteredNavigation.map((link) =>
+              Array.isArray(link.items) ? (
+                <li key={link.title}>
+                  <span className="font-medium text-gray-700 dark:text-gray-300 px-3 py-2 block">{link.title}</span>
+                  <ul>
+                    {link.items.map((item) => (
+                      <li key={item.title}>
+                        <Link
+                          href={item.href}
+                          className={cn(
+                            "flex items-center gap-3 rounded-lg px-3 py-2 text-gray-500 transition-all hover:text-gray-900 dark:text-gray-400 dark:hover:text-white",
+                            pathname === item.href
+                              ? "bg-blue-50 text-blue-600 dark:bg-gray-800 dark:text-blue-400"
+                              : "",
+                          )}
+                        >
+                          {item.icon}
+                          {isOpen && <span>{item.title}</span>}
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                </li>
+              ) : (
+                <li key={link.title}>
+                  <Link
+                    href={link.href}
+                    className={cn(
+                      "flex items-center gap-3 rounded-lg px-3 py-2 text-gray-500 transition-all hover:text-gray-900 dark:text-gray-400 dark:hover:text-white",
+                      pathname === link.href ? "bg-blue-50 text-blue-600 dark:bg-gray-800 dark:text-blue-400" : "",
+                    )}
+                  >
+                    <link.icon className="h-5 w-5" />
+                    {isOpen && <span>{link.title}</span>}
+                  </Link>
+                </li>
+              ),
+            )}
           </ul>
         </nav>
 
