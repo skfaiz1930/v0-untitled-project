@@ -1,36 +1,27 @@
 import type React from "react"
-import type { Metadata } from "next"
+import type { Metadata } from "next/dist/lib/metadata/types/metadata-interface"
 import { Inter } from "next/font/google"
 import "./globals.css"
 import { ThemeProvider } from "@/components/theme-provider"
-import { GamificationProvider } from "@/contexts/gamification-context"
-import { CommunityProvider } from "@/contexts/community-context"
-import { AuthProvider } from "@/contexts/auth-context"
-import { SharingPrompt } from "@/components/community/sharing-prompt"
-import { Toaster } from "@/components/ui/toaster"
 
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "NudgeManager - Leadership Development Platform",
-  description: "Develop your leadership skills with personalized nudges and feedback",
+  title: "Nudge - Daily Growth Habits",
+  description: "Build better habits with daily nudges",
     generator: 'v0.dev'
 }
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default function RootLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode
+}>) {
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={inter.className}>
-        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-          <AuthProvider>
-            <GamificationProvider>
-              <CommunityProvider>
-                {children}
-                <SharingPrompt />
-                <Toaster />
-              </CommunityProvider>
-            </GamificationProvider>
-          </AuthProvider>
+        <ThemeProvider attribute="class" defaultTheme="light" enableSystem disableTransitionOnChange>
+          {children}
         </ThemeProvider>
       </body>
     </html>

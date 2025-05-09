@@ -1,10 +1,10 @@
-import { DashboardHome } from "@/components/dashboard-home"
+import { NudgeDetail } from "@/components/nudge-detail"
 import { DashboardLayout } from "@/components/dashboard-layout"
 
-export default function Dashboard() {
+export default function NudgePage() {
   return (
     <DashboardLayout>
-      <DashboardHome />
+      <NudgeDetail />
     </DashboardLayout>
   )
 }

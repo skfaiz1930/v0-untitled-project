@@ -1,7 +1,5 @@
-import { redirect } from "next/navigation"
+import { LoginScreen } from "@/components/login-screen"
 
 export default function Home() {
-  // Redirect to the dashboard or onboarding based on user authentication status
-  // For demo purposes, we'll redirect to onboarding
-  redirect("/onboarding")
+  return <LoginScreen />
 }
